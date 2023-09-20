@@ -2,6 +2,7 @@
 using Game;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class LineDrawer : MonoBehaviour
 {
@@ -110,6 +111,7 @@ public class LineDrawer : MonoBehaviour
         Vector3 C1;
         Vector3 D1;
 
+        _line.loop = false;
         switch (_type)
         {
             case collision.OBB:
@@ -144,6 +146,79 @@ public class LineDrawer : MonoBehaviour
                 data.axes[1] = transform.up;
                 data.axes[2] = transform.forward;
 
+                //设置线段数量
+                _line.positionCount = 16;
+                //线的宽度
+                _line.startWidth = _width;
+                _line.endWidth = _width;
+                //根据8点画的_line；
+                _line.SetPosition(0, B1);//前左下
+                _line.SetPosition(1, C1);//前右下
+                _line.SetPosition(2, D1);//后右下
+                _line.SetPosition(3, A1);//后左下
+                _line.SetPosition(4, B1);
+                _line.SetPosition(5, B);//前左上
+                _line.SetPosition(6, C);//前右上
+                _line.SetPosition(7, D);//后右上
+                _line.SetPosition(8, A);//后左上
+                _line.SetPosition(9, B);
+                _line.SetPosition(10, A);
+                _line.SetPosition(11, A1);
+                _line.SetPosition(12, D1);
+                _line.SetPosition(13, D);
+                _line.SetPosition(14, C);
+                _line.SetPosition(15, C1);
+
+                break;
+            case collision.Circle:
+                center = _mesh.bounds.center;
+                extents = this.transform.localScale * _curExtentsRatio;
+
+                //Mathf.Sqrt(3)
+                float radius = 1.732f * extents.x;
+                data.radius = radius;
+                data.center = center;
+
+                //设置线段数量
+                _line.positionCount = 36 * 3 + 3 + 9;
+                //线的宽度
+                _line.startWidth = _width;
+                _line.endWidth = _width;
+                //根据36点画的_line；
+                for (int i = 0; i < 37; i++)
+                {
+                    float x = center.x + radius * Mathf.Sin(i * 10 * Mathf.PI / 180f);
+                    float y = center.y + radius * Mathf.Cos(i * 10 * Mathf.PI / 180f);
+                    Vector3 pos = new Vector3(x, y, center.z);
+                    _line.SetPosition(i, pos);
+                }
+
+                for (int i = 0; i < 37; i++)
+                {
+                    float z = center.z + radius * Mathf.Sin(i * 10 * Mathf.PI / 180f);
+                    float y = center.y + radius * Mathf.Cos(i * 10 * Mathf.PI / 180f);
+                    Vector3 pos = new Vector3(center.x, y, z);
+                    _line.SetPosition(i + 37, pos);
+                }
+
+                for(int i = 0; i < 9; i++)
+                {
+                    float z = center.z + radius * Mathf.Sin(i * 10 * Mathf.PI / 180f);
+                    float y = center.y + radius * Mathf.Cos(i * 10 * Mathf.PI / 180f);
+                    Vector3 pos = new Vector3(center.x, y, z);
+                    _line.SetPosition(i + 74, pos);
+                }
+
+                for (int i = 0; i < 37; i++)
+                {
+                    float x = center.x + radius * Mathf.Sin(i * 10 * Mathf.PI / 180f);
+                    float z = center.z + radius * Mathf.Cos(i * 10 * Mathf.PI / 180f);
+                    Vector3 pos = new Vector3(x, center.y, z);
+                    _line.SetPosition(i + 83, pos);
+                }
+
+                
+
                 break;
             case collision.AABB:
             default:
@@ -166,31 +241,31 @@ public class LineDrawer : MonoBehaviour
                 data.max = max;
                 data.min = min;
 
+                //设置线段数量
+                _line.positionCount = 16;
+                //线的宽度
+                _line.startWidth = _width;
+                _line.endWidth = _width;
+                //根据8点画的_line；
+                _line.SetPosition(0, B1);//前左下
+                _line.SetPosition(1, C1);//前右下
+                _line.SetPosition(2, D1);//后右下
+                _line.SetPosition(3, A1);//后左下
+                _line.SetPosition(4, B1);
+                _line.SetPosition(5, B);//前左上
+                _line.SetPosition(6, C);//前右上
+                _line.SetPosition(7, D);//后右上
+                _line.SetPosition(8, A);//后左上
+                _line.SetPosition(9, B);
+                _line.SetPosition(10, A);
+                _line.SetPosition(11, A1);
+                _line.SetPosition(12, D1);
+                _line.SetPosition(13, D);
+                _line.SetPosition(14, C);
+                _line.SetPosition(15, C1);
+
                 break;
         }
-
-        //设置线段数量
-        _line.positionCount = 16;
-        //线的宽度
-        _line.startWidth = _width;
-        _line.endWidth = _width;
-        //根据8点画的_line；
-        _line.SetPosition(0, B1);//前左下
-        _line.SetPosition(1, C1);//前右下
-        _line.SetPosition(2, D1);//后右下
-        _line.SetPosition(3, A1);//后左下
-        _line.SetPosition(4, B1);
-        _line.SetPosition(5, B);//前左上
-        _line.SetPosition(6, C);//前右上
-        _line.SetPosition(7, D);//后右上
-        _line.SetPosition(8, A);//后左上
-        _line.SetPosition(9, B);
-        _line.SetPosition(10, A);
-        _line.SetPosition(11, A1);
-        _line.SetPosition(12, D1);
-        _line.SetPosition(13, D);
-        _line.SetPosition(14, C);
-        _line.SetPosition(15, C1);
     }
 
     /// <summary>

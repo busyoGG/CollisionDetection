@@ -9,7 +9,10 @@ using UnityEngine.UI;
 public enum collision
 {
     AABB,
-    OBB
+    OBB,
+    Circle,
+    Circle2AABB,
+    Circle2OBB
 }
 
 public class Collision : MonoBehaviour
@@ -64,6 +67,9 @@ public class Collision : MonoBehaviour
                 break;
             case collision.OBB:
                 CollisionOBB();
+                break;
+            case collision.Circle:
+                CollisionCircle();
                 break;
         }
     }
@@ -167,6 +173,21 @@ public class Collision : MonoBehaviour
     //----- OBB ----- end
 
     //TODO ‘≤”Î‘≤
+    private void CollisionCircle()
+    {
+        float totalRadius = data1.radius + data2.radius;
+        float distance = Vector3.Distance(data1.center,data2.center);
+        if(distance <= totalRadius)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+        }
+    }
 
     //TODO ‘≤”ÎAABB
 
