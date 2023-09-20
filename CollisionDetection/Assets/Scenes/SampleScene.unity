@@ -250,6 +250,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
+  extents: {x: 0, y: 0, z: 0}
   center: {x: 0, y: 0, z: 0}
   radius: 1
 --- !u!1 &262192667
@@ -283,7 +284,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obj1: {fileID: 875163318}
   obj2: {fileID: 235361839}
-  _collision: 0
+  _collision: 4
 --- !u!4 &262192669
 Transform:
   m_ObjectHideFlags: 0
@@ -408,7 +409,7 @@ GameObject:
   - component: {fileID: 875163323}
   m_Layer: 0
   m_Name: Cube1
-  m_TagString: Untagged
+  m_TagString: Circle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -520,6 +521,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
+  extents: {x: 0, y: 0, z: 0}
   center: {x: 0, y: 0, z: 0}
   radius: 1
 --- !u!1 &963194225

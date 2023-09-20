@@ -71,16 +71,23 @@ public class Collision : MonoBehaviour
             case collision.Circle:
                 CollisionCircle();
                 break;
+            case collision.Circle2AABB:
+                CollisionCircle2AABB();
+                break;
+            case collision.Circle2OBB:
+                CollisionCircle2OBB();
+                break;
         }
     }
 
     //----- AABB ----- start
 
     /// <summary>
-    /// AABB碰撞
+    /// AABB检测
     /// </summary>
     private void CollisionAABB()
     {
+        //包围盒1的最小值比包围盒2的最大值还大 或 包围盒1的最大值比包围盒2的最小值还小 则不碰撞
         if (data1.max.x < data2.min.x || data1.max.y < data2.min.y || data1.max.z < data2.min.z ||
             data1.min.x > data2.max.x || data1.min.y > data2.max.y || data1.min.z > data2.max.z)
         {
@@ -103,7 +110,7 @@ public class Collision : MonoBehaviour
     /// </summary>
     private void CollisionOBB()
     {
-        //求两轴之间法平面轴
+        //求两个OBB包围盒之间两两坐标轴的法平面轴 共9个
         int len1 = data1.axes.Length;
         int len2 = data2.axes.Length;
         Vector3[] axes = new Vector3[len1 + len2 + len1 * len2];
@@ -126,7 +133,7 @@ public class Collision : MonoBehaviour
 
         for (int i = 0, len = axes.Length; i < len; i++)
         {
-            if (NotInteractiveObb(data1.vertexts, data2.vertexts, axes[i]))
+            if (NotInteractiveOBB(data1.vertexts, data2.vertexts, axes[i]))
             {
                 //有一个不相交就退出
                 line1.Collided(false);
@@ -139,16 +146,18 @@ public class Collision : MonoBehaviour
     }
 
     /// <summary>
-    /// 计算投影是否相交
+    /// 计算投影是否不相交
     /// </summary>
     /// <param name="vertexs1"></param>
     /// <param name="vertexs2"></param>
     /// <param name="axis"></param>
     /// <returns></returns>
-    private bool NotInteractiveObb(Vector3[] vertexs1, Vector3[] vertexs2, Vector3 axis)
+    private bool NotInteractiveOBB(Vector3[] vertexs1, Vector3[] vertexs2, Vector3 axis)
     {
+        //计算OBB包围盒在分离轴上的投影极限值
         float[] limit1 = GetProjectLimit(vertexs1, axis);
         float[] limit2 = GetProjectLimit(vertexs2, axis);
+        //两个包围盒极限值不相交，则不碰撞
         return limit1[0] > limit2[1] || limit2[0] > limit1[1];
     }
 
@@ -172,12 +181,18 @@ public class Collision : MonoBehaviour
     }
     //----- OBB ----- end
 
-    //TODO 圆与圆
+    //----- Circle ----- start
+    /// <summary>
+    /// 球与球检测
+    /// </summary>
     private void CollisionCircle()
     {
-        float totalRadius = data1.radius + data2.radius;
-        float distance = Vector3.Distance(data1.center,data2.center);
-        if(distance <= totalRadius)
+        //求两个球半径和
+        float totalRadius = Mathf.Pow(data1.radius + data2.radius, 2);
+        //球两个球心之间的距离
+        float distance = (data1.center - data2.center).sqrMagnitude;
+        //距离小于等于半径和则碰撞
+        if (distance <= totalRadius)
         {
             line1.Collided(true);
             line2.Collided(true);
@@ -189,9 +204,85 @@ public class Collision : MonoBehaviour
         }
     }
 
-    //TODO 圆与AABB
+    /// <summary>
+    /// 球与AABB检测
+    /// </summary>
+    private void CollisionCircle2AABB()
+    {
+        //求出最近点
+        Vector3 center = data1.center;
+        Vector3 nearP = Vector3.zero;
+        nearP.x = Mathf.Clamp(center.x, data2.min.x, data2.max.x);
+        nearP.y = Mathf.Clamp(center.y, data2.min.y, data2.max.y);
+        nearP.z = Mathf.Clamp(center.z, data2.min.z, data2.max.z);
+        //求出最近点与球心的距离
+        float distance = (nearP - center).sqrMagnitude;
+        float radius = Mathf.Pow(data1.radius, 2);
+        //距离小于半径则碰撞
+        if (distance <= radius)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+        }
+    }
 
-    //TODO 圆与OBB
+    /// <summary>
+    /// 球与OBB检测
+    /// </summary>
+    private void CollisionCircle2OBB()
+    {
+        //求最近点
+        Vector3 nearP = GetClosestPointOBB();
+        //与AABB检测原理相同
+        float distance = (nearP - data1.center).sqrMagnitude;
+        float radius = Mathf.Pow(data1.radius, 2);
+        if (distance <= radius)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+        }
+    }
+
+    /// <summary>
+    /// 获取一点到OBB的最近点
+    /// </summary>
+    /// <returns></returns>
+    private Vector3 GetClosestPointOBB()
+    {
+        Vector3 nearP = data2.center;
+        //求球心与OBB中心的距离向量 从OBB中心指向球心
+        Vector3 center1 = data1.center;
+        Vector3 center2 = data2.center;
+        Vector3 dist = center1 - center2;
+
+        float[] extents = new float[3] { data2.extents.x, data2.extents.y, data2.extents.z };
+        Vector3[] axes = data2.axes;
+
+        for (int i = 0; i < 3; i++)
+        {
+            //计算距离向量到OBB坐标轴的投影长度 即距离向量在OBB坐标系中的对应坐标轴的长度
+            float distance = Vector3.Dot(dist, axes[i]);
+            distance = Mathf.Clamp(distance, -extents[i], extents[i]);
+            //还原到世界坐标
+            nearP.x += distance * axes[i].x;
+            nearP.y += distance * axes[i].y;
+            nearP.z += distance * axes[i].z;
+        }
+        //ConsoleUtils.Log("最近点", nearP);
+        return nearP;
+    }
+
+    //----- Circle ----- end
 
     //TODO 射线检测
 
