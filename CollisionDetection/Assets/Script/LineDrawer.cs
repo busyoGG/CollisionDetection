@@ -107,7 +107,7 @@ public class LineDrawer : MonoBehaviour
                 SetCircle();
                 break;
             case collision.Circle2AABB:
-                if(tag == "Circle")
+                if (tag == "Change")
                 {
                     SetCircle();
                 }
@@ -117,9 +117,39 @@ public class LineDrawer : MonoBehaviour
                 }
                 break;
             case collision.Circle2OBB:
-                if (tag == "Circle")
+                if (tag == "Change")
                 {
                     SetCircle();
+                }
+                else
+                {
+                    SetOBB();
+                }
+                break;
+            case collision.Line2Circle:
+                if (tag == "Change")
+                {
+                    SetLine();
+                }
+                else
+                {
+                    SetCircle();
+                }
+                break;
+            case collision.Line2AABB:
+                if (tag == "Change")
+                {
+                    SetLine();
+                }
+                else
+                {
+                    SetAABB();
+                }
+                break;
+            case collision.Line2OBB:
+                if (tag == "Change")
+                {
+                    SetLine();
                 }
                 else
                 {
@@ -323,6 +353,29 @@ public class LineDrawer : MonoBehaviour
             Vector3 pos = new Vector3(x, center.y, z);
             _line.SetPosition(i + 83, pos);
         }
+    }
+
+    private void SetLine()
+    {
+        Vector3 center = transform.position;
+        Vector3 direction = transform.rotation * Vector3.right;
+        float radius = _curExtentsRatio * 10;
+
+        data.radius = radius;
+        data.center = center;
+        data.direction = direction;
+
+        Vector3 origin = center;
+        Vector3 target = center + direction * radius;
+
+        //设置线段数量
+        _line.positionCount = 2;
+        //线的宽度
+        _line.startWidth = _width;
+        _line.endWidth = _width;
+        //根据8点画的_line；
+        _line.SetPosition(0, origin);//起点
+        _line.SetPosition(1, target);//终点
     }
 
     /// <summary>

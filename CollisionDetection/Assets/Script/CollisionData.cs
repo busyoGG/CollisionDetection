@@ -11,4 +11,5 @@ public class CollisionData : MonoBehaviour
     public Vector3 extents = Vector3.zero;
     public Vector3 center = Vector3.zero;
     public float radius = 1.0f;
+    public Vector3 direction = Vector3.zero;
 }

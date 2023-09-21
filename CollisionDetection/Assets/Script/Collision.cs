@@ -12,7 +12,10 @@ public enum collision
     OBB,
     Circle,
     Circle2AABB,
-    Circle2OBB
+    Circle2OBB,
+    Line2Circle,
+    Line2AABB,
+    Line2OBB
 }
 
 public class Collision : MonoBehaviour
@@ -76,6 +79,9 @@ public class Collision : MonoBehaviour
                 break;
             case collision.Circle2OBB:
                 CollisionCircle2OBB();
+                break;
+            case collision.Line2Circle:
+                CollisionRay2Circle();
                 break;
         }
     }
@@ -284,7 +290,50 @@ public class Collision : MonoBehaviour
 
     //----- Circle ----- end
 
-    //TODO 射线检测
+    //----- Ray ----- start
+
+    /// <summary>
+    /// 射线和球检测
+    /// </summary>
+    private void CollisionRay2Circle()
+    {
+        Vector3 centerDis = data2.center - data1.center;
+        Vector3 direction = data1.direction;
+
+        float projection = Vector3.Dot(centerDis, direction);
+        float r2 = Mathf.Pow(data2.radius, 2);
+        float f = Mathf.Pow(projection, 2) + r2 - centerDis.sqrMagnitude;
+
+        //方向相反
+        bool checkDirection = projection < 0;
+        //射线过短
+        bool checkDistance = centerDis.sqrMagnitude > Mathf.Pow(data1.radius + data2.radius, 2);
+        //射线起点在球内部
+        bool checkInside = centerDis.sqrMagnitude < r2;
+        //不相交
+        bool checkNotCollide = f < 0;
+
+        if (checkDirection || checkDistance || checkInside || checkNotCollide)
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+            return;
+        }
+
+        line1.Collided(true);
+        line2.Collided(true);
+
+        float dir = projection - Mathf.Sqrt(f);
+        Vector3 point = data1.center + data1.direction * dir;
+        ConsoleUtils.Log("碰撞点", point);
+    }
+
+    private void CollisionRay2AABB()
+    {
+
+    }
+
+    //----- Ray ----- end
 
     //TODO GJK检测
 }
