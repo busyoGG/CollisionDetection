@@ -333,11 +333,8 @@ public class Collision : MonoBehaviour
 
     private void CollisionRay2AABB()
     {
-        //判断平行和反向情况
-        if (data1.direction.x == 0 && (data1.center.x < data2.min.x || data1.center.x > data2.max.x) ||
-            data1.direction.y == 0 && (data1.center.y < data2.min.y || data1.center.y > data2.max.y) ||
-            data1.direction.z == 0 && (data1.center.z < data2.min.z || data1.center.z > data2.max.z) ||
-            Vector3.Dot(data2.center - data1.center,data1.direction) < 0)
+        //判断反向情况
+        if (Vector3.Dot(data2.center - data1.center,data1.direction) < 0)
         {
             line1.Collided(false);
             line2.Collided(false);
