@@ -1,2 +1,4 @@
 # CollisionDetection
 碰撞检测案例
+
+SampleScene的Root节点负责控制碰撞检测的条件，Cube1和Cube2在运行时手动拖拽可检测碰撞
