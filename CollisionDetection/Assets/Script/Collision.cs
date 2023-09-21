@@ -86,6 +86,9 @@ public class Collision : MonoBehaviour
             case collision.Line2AABB:
                 CollisionRay2AABB();
                 break;
+            case collision.Line2OBB:
+                CollisionRay2OBB();
+                break;
         }
     }
 
@@ -287,7 +290,6 @@ public class Collision : MonoBehaviour
             nearP.y += distance * axes[i].y;
             nearP.z += distance * axes[i].z;
         }
-        //ConsoleUtils.Log("最近点", nearP);
         return nearP;
     }
 
@@ -334,7 +336,7 @@ public class Collision : MonoBehaviour
     private void CollisionRay2AABB()
     {
         //判断反向情况
-        if (Vector3.Dot(data2.center - data1.center,data1.direction) < 0)
+        if (Vector3.Dot(data2.center - data1.center, data1.direction) < 0)
         {
             line1.Collided(false);
             line2.Collided(false);
@@ -355,10 +357,65 @@ public class Collision : MonoBehaviour
         if (data1.direction.z < 0) Swap(ref pMin.z, ref pMax.z);
 
 
-        float n = Mathf.Max(pMin.x,pMin.y,pMin.z);
-        float f = Mathf.Min(pMax.x,pMax.y,pMax.z);
+        float n = Mathf.Max(pMin.x, pMin.y, pMin.z);
+        float f = Mathf.Min(pMax.x, pMax.y, pMax.z);
 
-        if(n < f)
+        if (n < f)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+            return;
+        }
+
+        Vector3 point = data1.center + data1.direction * n;
+
+        ConsoleUtils.Log("碰撞点", point);
+    }
+
+    private void CollisionRay2OBB()
+    {
+        //判断反向情况
+        if (Vector3.Dot(data2.center - data1.center, data1.direction) < 0)
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+            return;
+        }
+
+        //判断非平行情况
+
+        Vector3 min = Vector3.zero;
+        min.x = Vector3.Dot(data2.vertexts[4] - data1.center, data2.axes[0]);
+        min.y = Vector3.Dot(data2.vertexts[4] - data1.center, data2.axes[1]);
+        min.z = Vector3.Dot(data2.vertexts[4] - data1.center, data2.axes[2]);
+
+        Vector3 max = Vector3.zero;
+        max.x = Vector3.Dot(data2.vertexts[2] - data1.center, data2.axes[0]);
+        max.y = Vector3.Dot(data2.vertexts[2] - data1.center, data2.axes[1]);
+        max.z = Vector3.Dot(data2.vertexts[2] - data1.center, data2.axes[2]);
+
+        Vector3 projection = Vector3.zero;
+        projection.x = 1 / Vector3.Dot(data1.direction, data2.axes[0]);
+        projection.y = 1 / Vector3.Dot(data1.direction, data2.axes[1]);
+        projection.z = 1 / Vector3.Dot(data1.direction, data2.axes[2]);
+
+        Vector3 pMin = Vector3.Scale(min, projection);
+        Vector3 pMax = Vector3.Scale(max, projection);
+
+        if (projection.x < 0) Swap(ref pMin.x, ref pMax.x);
+        if (projection.y < 0) Swap(ref pMin.y, ref pMax.y);
+        if (projection.z < 0) Swap(ref pMin.z, ref pMax.z);
+
+
+        float n = Mathf.Max(pMin.x, pMin.y, pMin.z);
+        float f = Mathf.Min(pMax.x, pMax.y, pMax.z);
+
+        if (n < f)
         {
             line1.Collided(true);
             line2.Collided(true);
