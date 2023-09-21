@@ -1,6 +1,7 @@
 using Game;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -223,10 +224,7 @@ public class Collision : MonoBehaviour
     {
         //求出最近点
         Vector3 center = data1.center;
-        Vector3 nearP = Vector3.zero;
-        nearP.x = Mathf.Clamp(center.x, data2.min.x, data2.max.x);
-        nearP.y = Mathf.Clamp(center.y, data2.min.y, data2.max.y);
-        nearP.z = Mathf.Clamp(center.z, data2.min.z, data2.max.z);
+        Vector3 nearP = GetClosestPointAABB();
         //求出最近点与球心的距离
         float distance = (nearP - center).sqrMagnitude;
         float radius = Mathf.Pow(data1.radius, 2);
@@ -241,6 +239,20 @@ public class Collision : MonoBehaviour
             line1.Collided(false);
             line2.Collided(false);
         }
+    }
+
+    /// <summary>
+    /// 获得一点到AABB最近点
+    /// </summary>
+    /// <returns></returns>
+    private Vector3 GetClosestPointAABB()
+    {
+        Vector3 center = data1.center;
+        Vector3 nearP = Vector3.zero;
+        nearP.x = Mathf.Clamp(center.x, data2.min.x, data2.max.x);
+        nearP.y = Mathf.Clamp(center.y, data2.min.y, data2.max.y);
+        nearP.z = Mathf.Clamp(center.z, data2.min.z, data2.max.z);
+        return nearP;
     }
 
     /// <summary>
@@ -314,11 +326,11 @@ public class Collision : MonoBehaviour
         //射线过短
         bool checkDistance = centerDis.sqrMagnitude > Mathf.Pow(data1.radius + data2.radius, 2);
         //射线起点在球内部
-        bool checkInside = centerDis.sqrMagnitude < r2;
+        bool checkNotInside = centerDis.sqrMagnitude > r2;
         //不相交
         bool checkNotCollide = f < 0;
 
-        if (checkDirection || checkDistance || checkInside || checkNotCollide)
+        if (checkNotInside && (checkDirection || checkDistance || checkNotCollide))
         {
             line1.Collided(false);
             line2.Collided(false);
@@ -328,15 +340,20 @@ public class Collision : MonoBehaviour
         line1.Collided(true);
         line2.Collided(true);
 
-        float dir = projection - Mathf.Sqrt(f);
-        Vector3 point = data1.center + data1.direction * dir;
+        float dis = projection - Mathf.Sqrt(f) * (checkNotInside ? 1 : -1);
+        Vector3 point = data1.center + data1.direction * dis;
         ConsoleUtils.Log("碰撞点", point);
     }
 
     private void CollisionRay2AABB()
     {
+        //判断是否不在AABB内
+        bool checkNotInside = data1.center.x > data2.max.x || data1.center.x < data2.min.x ||
+            data1.center.y > data2.max.y || data1.center.y < data2.min.y ||
+            data1.center.z > data2.max.z || data1.center.z < data2.min.z;
         //判断反向情况
-        if (Vector3.Dot(data2.center - data1.center, data1.direction) < 0)
+        bool checkForawd = Vector3.Dot(data2.center - data1.center, data1.direction) < 0;
+        if (checkNotInside && checkForawd)
         {
             line1.Collided(false);
             line2.Collided(false);
@@ -356,31 +373,50 @@ public class Collision : MonoBehaviour
         if (data1.direction.y < 0) Swap(ref pMin.y, ref pMax.y);
         if (data1.direction.z < 0) Swap(ref pMin.z, ref pMax.z);
 
-
         float n = Mathf.Max(pMin.x, pMin.y, pMin.z);
         float f = Mathf.Min(pMax.x, pMax.y, pMax.z);
 
-        if (n < f)
+        if (!checkNotInside)
         {
             line1.Collided(true);
             line2.Collided(true);
+            Vector3 point = data1.center + data1.direction * f;
+
+            ConsoleUtils.Log("碰撞点", point);
         }
         else
         {
-            line1.Collided(false);
-            line2.Collided(false);
-            return;
+            if (n < f && data1.radius >= n)
+            {
+                line1.Collided(true);
+                line2.Collided(true);
+            }
+            else
+            {
+                line1.Collided(false);
+                line2.Collided(false);
+                return;
+            }
+
+            Vector3 point = data1.center + data1.direction * n;
+
+            ConsoleUtils.Log("碰撞点", point);
         }
-
-        Vector3 point = data1.center + data1.direction * n;
-
-        ConsoleUtils.Log("碰撞点", point);
     }
 
     private void CollisionRay2OBB()
     {
+        //判断不在OBB内
+        Vector3 centerDis = data1.center - data2.center;
+        float ray2ObbX = Vector3.Dot(centerDis, data2.axes[0]);
+        float ray2ObbY = Vector3.Dot(centerDis, data2.axes[1]);
+        float ray2ObbZ = Vector3.Dot(centerDis, data2.axes[2]);
+        bool checkNotInside = ray2ObbX < -data2.extents[0] || ray2ObbX > data2.extents[0] ||
+            ray2ObbY < -data2.extents[1] || ray2ObbY > data2.extents[1] ||
+            ray2ObbZ < -data2.extents[2] || ray2ObbZ > data2.extents[2];
         //判断反向情况
-        if (Vector3.Dot(data2.center - data1.center, data1.direction) < 0)
+        bool checkFoward = Vector3.Dot(data2.center - data1.center, data1.direction) < 0;
+        if (checkNotInside && checkFoward)
         {
             line1.Collided(false);
             line2.Collided(false);
@@ -415,21 +451,32 @@ public class Collision : MonoBehaviour
         float n = Mathf.Max(pMin.x, pMin.y, pMin.z);
         float f = Mathf.Min(pMax.x, pMax.y, pMax.z);
 
-        if (n < f)
+        if (!checkNotInside)
         {
             line1.Collided(true);
             line2.Collided(true);
+            Vector3 point = data1.center + data1.direction * f;
+
+            ConsoleUtils.Log("碰撞点", point);
         }
         else
         {
-            line1.Collided(false);
-            line2.Collided(false);
-            return;
+            if (n < f && data1.radius >= n)
+            {
+                line1.Collided(true);
+                line2.Collided(true);
+            }
+            else
+            {
+                line1.Collided(false);
+                line2.Collided(false);
+                return;
+            }
+
+            Vector3 point = data1.center + data1.direction * n;
+
+            ConsoleUtils.Log("碰撞点", point);
         }
-
-        Vector3 point = data1.center + data1.direction * n;
-
-        ConsoleUtils.Log("碰撞点", point);
     }
 
     //----- Ray ----- end
