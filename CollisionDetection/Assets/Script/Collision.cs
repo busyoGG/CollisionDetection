@@ -83,6 +83,9 @@ public class Collision : MonoBehaviour
             case collision.Line2Circle:
                 CollisionRay2Circle();
                 break;
+            case collision.Line2AABB:
+                CollisionRay2AABB();
+                break;
         }
     }
 
@@ -330,10 +333,62 @@ public class Collision : MonoBehaviour
 
     private void CollisionRay2AABB()
     {
+        //判断平行和反向情况
+        if (data1.direction.x == 0 && (data1.center.x < data2.min.x || data1.center.x > data2.max.x) ||
+            data1.direction.y == 0 && (data1.center.y < data2.min.y || data1.center.y > data2.max.y) ||
+            data1.direction.z == 0 && (data1.center.z < data2.min.z || data1.center.z > data2.max.z) ||
+            Vector3.Dot(data2.center - data1.center,data1.direction) < 0)
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+            return;
+        }
 
+        //判断非平行情况
+        Vector3 min = data2.min - data1.center;
+        Vector3 max = data2.max - data1.center;
+
+        Vector3 projection = new Vector3(1 / data1.direction.x, 1 / data1.direction.y, 1 / data1.direction.z);
+
+        Vector3 pMin = Vector3.Scale(min, projection);
+        Vector3 pMax = Vector3.Scale(max, projection);
+
+        if (data1.direction.x < 0) Swap(ref pMin.x, ref pMax.x);
+        if (data1.direction.y < 0) Swap(ref pMin.y, ref pMax.y);
+        if (data1.direction.z < 0) Swap(ref pMin.z, ref pMax.z);
+
+
+        float n = Mathf.Max(pMin.x,pMin.y,pMin.z);
+        float f = Mathf.Min(pMax.x,pMax.y,pMax.z);
+
+        if(n < f)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+            return;
+        }
+
+        Vector3 point = data1.center + data1.direction * n;
+
+        ConsoleUtils.Log("碰撞点", point);
     }
 
     //----- Ray ----- end
 
     //TODO GJK检测
+
+    //工具函数
+
+    private void Swap(ref float one, ref float two)
+    {
+        float temp;
+        temp = one;
+        one = two;
+        two = temp;
+    }
 }

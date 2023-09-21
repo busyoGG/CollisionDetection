@@ -202,6 +202,10 @@ public class LineDrawer : MonoBehaviour
 
         data.center = center;
 
+        data.axes[0] = transform.right;
+        data.axes[1] = transform.up;
+        data.axes[2] = transform.forward;
+
         //设置线段数量
         _line.positionCount = 16;
         //线的宽度
