@@ -168,8 +168,8 @@ public class Collision : MonoBehaviour
     private bool NotInteractiveOBB(Vector3[] vertexs1, Vector3[] vertexs2, Vector3 axis)
     {
         //计算OBB包围盒在分离轴上的投影极限值
-        float[] limit1 = GetProjectLimit(vertexs1, axis);
-        float[] limit2 = GetProjectLimit(vertexs2, axis);
+        float[] limit1 = GetProjectionLimit(vertexs1, axis);
+        float[] limit2 = GetProjectionLimit(vertexs2, axis);
         //两个包围盒极限值不相交，则不碰撞
         return limit1[0] > limit2[1] || limit2[0] > limit1[1];
     }
@@ -180,7 +180,7 @@ public class Collision : MonoBehaviour
     /// <param name="vertexts"></param>
     /// <param name="axis"></param>
     /// <returns></returns>
-    private float[] GetProjectLimit(Vector3[] vertexts, Vector3 axis)
+    private float[] GetProjectionLimit(Vector3[] vertexts, Vector3 axis)
     {
         float[] result = new float[2] { float.MaxValue, float.MinValue };
         for (int i = 0, len = vertexts.Length; i < len; i++)
@@ -314,6 +314,7 @@ public class Collision : MonoBehaviour
     /// </summary>
     private void CollisionRay2Circle()
     {
+        
         Vector3 centerDis = data2.center - data1.center;
         Vector3 direction = data1.direction;
 

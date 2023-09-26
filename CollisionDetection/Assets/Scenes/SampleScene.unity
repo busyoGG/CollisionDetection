@@ -285,7 +285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obj1: {fileID: 875163318}
   obj2: {fileID: 235361839}
-  _collision: 5
+  _collision: 0
 --- !u!4 &262192669
 Transform:
   m_ObjectHideFlags: 0
