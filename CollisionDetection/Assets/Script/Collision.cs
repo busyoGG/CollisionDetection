@@ -361,7 +361,7 @@ public class Collision : MonoBehaviour
             return;
         }
 
-        //判断非平行情况
+        //判断是否相交
         Vector3 min = data2.min - data1.center;
         Vector3 max = data2.max - data1.center;
 
@@ -424,17 +424,19 @@ public class Collision : MonoBehaviour
             return;
         }
 
-        //判断非平行情况
-
+        //判断是否相交
         Vector3 min = Vector3.zero;
-        min.x = Vector3.Dot(data2.vertexts[4] - data1.center, data2.axes[0]);
-        min.y = Vector3.Dot(data2.vertexts[4] - data1.center, data2.axes[1]);
-        min.z = Vector3.Dot(data2.vertexts[4] - data1.center, data2.axes[2]);
+        Vector3 minP = data2.vertexts[4] - data1.center;
+        min.x = Vector3.Dot(minP, data2.axes[0]);
+        min.y = Vector3.Dot(minP, data2.axes[1]);
+        min.z = Vector3.Dot(minP, data2.axes[2]);
 
         Vector3 max = Vector3.zero;
-        max.x = Vector3.Dot(data2.vertexts[2] - data1.center, data2.axes[0]);
-        max.y = Vector3.Dot(data2.vertexts[2] - data1.center, data2.axes[1]);
-        max.z = Vector3.Dot(data2.vertexts[2] - data1.center, data2.axes[2]);
+        Vector3 maxP = data2.vertexts[2] - data1.center;
+        max.x = Vector3.Dot(maxP, data2.axes[0]);
+        max.y = Vector3.Dot(maxP, data2.axes[1]);
+        max.z = Vector3.Dot(maxP, data2.axes[2]);
+        
 
         Vector3 projection = Vector3.zero;
         projection.x = 1 / Vector3.Dot(data1.direction, data2.axes[0]);
@@ -451,6 +453,10 @@ public class Collision : MonoBehaviour
 
         float n = Mathf.Max(pMin.x, pMin.y, pMin.z);
         float f = Mathf.Min(pMax.x, pMax.y, pMax.z);
+
+        Debug.Log(n + " " + f);
+        Debug.Log(pMin + " " + pMax);
+        Debug.Log(projection);
 
         if (!checkNotInside)
         {
