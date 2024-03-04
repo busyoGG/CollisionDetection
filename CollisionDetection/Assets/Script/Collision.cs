@@ -16,7 +16,8 @@ public enum collision
     Circle2OBB,
     Line2Circle,
     Line2AABB,
-    Line2OBB
+    Line2OBB,
+    Capsule
 }
 
 public class Collision : MonoBehaviour
@@ -89,6 +90,9 @@ public class Collision : MonoBehaviour
                 break;
             case collision.Line2OBB:
                 CollisionRay2OBB();
+                break;
+            case collision.Capsule:
+                CollisionCapsule();
                 break;
         }
     }
@@ -314,7 +318,7 @@ public class Collision : MonoBehaviour
     /// </summary>
     private void CollisionRay2Circle()
     {
-        
+
         Vector3 centerDis = data2.center - data1.center;
         Vector3 direction = data1.direction;
 
@@ -436,7 +440,7 @@ public class Collision : MonoBehaviour
         max.x = Vector3.Dot(maxP, data2.axes[0]);
         max.y = Vector3.Dot(maxP, data2.axes[1]);
         max.z = Vector3.Dot(maxP, data2.axes[2]);
-        
+
 
         Vector3 projection = Vector3.zero;
         projection.x = 1 / Vector3.Dot(data1.direction, data2.axes[0]);
@@ -488,6 +492,52 @@ public class Collision : MonoBehaviour
 
     //----- Ray ----- end
 
+    //----- Capsule ----- start
+
+    private void CollisionCapsule()
+    {
+        //计算头尾点最值
+        Vector3 pointA1 = data1.center + data1.direction * data1.extents.y;
+        Vector3 pointA2 = data1.center - data1.direction * data1.extents.y;
+
+        Vector3 pointB1 = data2.center + data2.direction * data2.extents.y;
+        Vector3 pointB2 = data2.center - data2.direction * data2.extents.y;
+
+        Vector3 closest1;
+
+        if ((pointA1 - data2.center).magnitude <= (pointA2 - data2.center).magnitude)
+        {
+            closest1 = pointA1;
+        }
+        else
+        {
+            closest1 = pointA2;
+        }
+
+        Vector3 closest2 = GetClosestPointOnLineSegment(pointB1, pointB2, closest1);
+        closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
+
+        //求两个球半径和
+        float totalRadius = Mathf.Pow(data1.radius + data2.radius, 2);
+        //球两个球心之间的距离
+        float distance = (closest1 - closest2).sqrMagnitude;
+        //距离小于等于半径和则碰撞
+        if (distance <= totalRadius)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+        }
+    }
+
+
+
+    //----- Capsule ----- end
+
     //TODO GJK检测
 
     //工具函数
@@ -498,5 +548,14 @@ public class Collision : MonoBehaviour
         temp = one;
         one = two;
         two = temp;
+    }
+
+    private Vector3 GetClosestPointOnLineSegment(Vector3 start, Vector3 end, Vector3 point)
+    {
+        Vector3 line = end - start;
+        //dot line line 求长度平方
+        float ratio = Vector3.Dot(point - start, line) / Vector3.Dot(line, line);
+        ratio = Mathf.Min(Mathf.Max(ratio, 0), 1);
+        return start + ratio * line;
     }
 }

@@ -155,8 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2a4bea1dab13b49a2a85bac8e0cab7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _color: {r: 1, g: 0, b: 0, a: 1}
-  _width: 0.02
+  _length: 0.5
   _extentsRatio: 0.51
 --- !u!23 &235361841
 MeshRenderer:
@@ -254,6 +253,7 @@ MonoBehaviour:
   center: {x: 0, y: 0, z: 0}
   radius: 1
   direction: {x: 0, y: 0, z: 0}
+  rotation: {x: 0, y: 0, z: 0, w: 1}
 --- !u!1 &262192667
 GameObject:
   m_ObjectHideFlags: 0
@@ -285,7 +285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obj1: {fileID: 875163318}
   obj2: {fileID: 235361839}
-  _collision: 7
+  _collision: 8
 --- !u!4 &262192669
 Transform:
   m_ObjectHideFlags: 0
@@ -427,8 +427,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2a4bea1dab13b49a2a85bac8e0cab7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _color: {r: 1, g: 0, b: 0, a: 1}
-  _width: 0.02
+  _length: 0.5
   _extentsRatio: 0.51
 --- !u!23 &875163320
 MeshRenderer:
@@ -526,6 +525,7 @@ MonoBehaviour:
   center: {x: 0, y: 0, z: 0}
   radius: 1
   direction: {x: 0, y: 0, z: 0}
+  rotation: {x: 0, y: 0, z: 0, w: 1}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0

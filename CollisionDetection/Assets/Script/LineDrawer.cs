@@ -1,5 +1,7 @@
 
 using Game;
+using JetBrains.Annotations;
+using System.Data;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -8,10 +10,12 @@ using static UnityEditor.PlayerSettings;
 public class LineDrawer : MonoBehaviour
 {
     private MeshRenderer _mesh;
+    //[SerializeField]
+    //private Color _color = Color.white;
     [SerializeField]
-    private Color _color = Color.white;
-    [SerializeField]
-    private float _width = 0.02f;
+    private float _length = 0.5f;
+
+    private float _curLength = 0.5f;
     [SerializeField]
     private float _extentsRatio = 0.51f;
 
@@ -20,7 +24,7 @@ public class LineDrawer : MonoBehaviour
     /// <summary>
     /// 画线器
     /// </summary>
-    private LineRenderer _line;
+    //private LineRenderer _line;
 
     /// <summary>
     /// 碰撞类型
@@ -53,33 +57,46 @@ public class LineDrawer : MonoBehaviour
         _mesh = this.GetComponent<MeshRenderer>();
         _collisionScript = GameObject.Find("Root").GetComponent<Collision>();
 
-        _line = this.gameObject.AddComponent<LineRenderer>();
-        Material mat = Resources.Load<Material>("Materials/white_unlit");
-        _line.loop = true;
-        _line.sharedMaterial = mat;
-        Debug.Log("加载材质" + mat.name);
+        //_line = this.gameObject.AddComponent<LineRenderer>();
+        //Material mat = Resources.Load<Material>("Materials/white_unlit");
+        //_line.loop = true;
+        //_line.sharedMaterial = mat;
+        //Debug.Log("加载材质" + mat.name);
 
         data = GetComponent<CollisionData>();
     }
 
     // Update is called once per frame
-    void Update()
+    //void Update()
+    //{
+    //    _type = _collisionScript.GetCollision();
+    //    CheckChange();
+    //    DrawBox();
+    //}
+
+    private void OnDrawGizmos()
     {
-        _type = _collisionScript.GetCollision();
-        CheckChange();
-        DrawBox();
+        if (Application.isPlaying)
+        {
+            _type = _collisionScript.GetCollision();
+            CheckChange();
+            SetBox();
+            DrawBox();
+        }
     }
+
 
     private void CheckChange()
     {
         if (_pos != this.transform.position || _rot != this.transform.rotation || _scale != this.transform.localScale || _extentsRatio != _curExtentsRatio ||
-            _curType != _type)
+            _curType != _type || _length != _curLength)
         {
             _pos = this.transform.position;
             _rot = this.transform.rotation;
             _scale = this.transform.localScale;
             _curExtentsRatio = _extentsRatio;
             _curType = _type;
+            _curLength = _length;
             changed = true;
         }
         else
@@ -88,16 +105,16 @@ public class LineDrawer : MonoBehaviour
         }
     }
 
-    private void DrawBox()
+    private void SetBox()
     {
         if (!changed)
         {
             return;
         }
-        _line.material.color = _color;
+        //_line.material.color = _color;
 
 
-        _line.loop = false;
+        //_line.loop = false;
         switch (_type)
         {
             case collision.OBB:
@@ -156,9 +173,84 @@ public class LineDrawer : MonoBehaviour
                     SetOBB();
                 }
                 break;
+            case collision.Capsule:
+                SetCapsule();
+                break;
             case collision.AABB:
             default:
                 SetAABB();
+                break;
+        }
+    }
+
+    private void DrawBox()
+    {
+        Gizmos.color = Color.red;
+        //_line.loop = false;
+        switch (_type)
+        {
+            case collision.OBB:
+                DrawCube(true);
+                break;
+            case collision.Circle:
+                DrawSphere();
+                break;
+            case collision.Circle2AABB:
+                if (tag == "Change")
+                {
+                    DrawSphere();
+                }
+                else
+                {
+                    DrawCube();
+                }
+                break;
+            case collision.Circle2OBB:
+                if (tag == "Change")
+                {
+                    DrawSphere();
+                }
+                else
+                {
+                    DrawCube(true);
+                }
+                break;
+            case collision.Line2Circle:
+                if (tag == "Change")
+                {
+                    DrawLine();
+                }
+                else
+                {
+                    DrawSphere();
+                }
+                break;
+            case collision.Line2AABB:
+                if (tag == "Change")
+                {
+                    DrawLine();
+                }
+                else
+                {
+                    DrawCube();
+                }
+                break;
+            case collision.Line2OBB:
+                if (tag == "Change")
+                {
+                    DrawLine();
+                }
+                else
+                {
+                    DrawCube(true);
+                }
+                break;
+            case collision.Capsule:
+                DrawCapsule();
+                break;
+            case collision.AABB:
+            default:
+                DrawCube();
                 break;
         }
     }
@@ -171,63 +263,21 @@ public class LineDrawer : MonoBehaviour
         Vector3 max;
         Vector3 min;
 
-        //8个点顶点
-        Vector3 A;
-        Vector3 B;
-        Vector3 C;
-        Vector3 D;
-        Vector3 A1;
-        Vector3 B1;
-        Vector3 C1;
-        Vector3 D1;
-
         center = _mesh.bounds.center;
         extents = _mesh.bounds.size * _curExtentsRatio;
 
         max = center + extents;
         min = center - extents;
 
-        //8个点顶点
-        A = new Vector3(min.x, max.y, min.z);
-        B = new Vector3(min.x, max.y, max.z);
-        C = new Vector3(max.x, max.y, max.z);
-        D = new Vector3(max.x, max.y, min.z);
-        A1 = new Vector3(min.x, min.y, min.z);
-        B1 = new Vector3(min.x, min.y, max.z);
-        C1 = new Vector3(max.x, min.y, max.z);
-        D1 = new Vector3(max.x, min.y, min.z);
-
         data.max = max;
         data.min = min;
 
         data.center = center;
+        data.extents = extents;
 
         data.axes[0] = transform.right;
         data.axes[1] = transform.up;
         data.axes[2] = transform.forward;
-
-        //设置线段数量
-        _line.positionCount = 16;
-        //线的宽度
-        _line.startWidth = _width;
-        _line.endWidth = _width;
-        //根据8点画的_line；
-        _line.SetPosition(0, B1);//前左下
-        _line.SetPosition(1, C1);//前右下
-        _line.SetPosition(2, D1);//后右下
-        _line.SetPosition(3, A1);//后左下
-        _line.SetPosition(4, B1);
-        _line.SetPosition(5, B);//前左上
-        _line.SetPosition(6, C);//前右上
-        _line.SetPosition(7, D);//后右上
-        _line.SetPosition(8, A);//后左上
-        _line.SetPosition(9, B);
-        _line.SetPosition(10, A);
-        _line.SetPosition(11, A1);
-        _line.SetPosition(12, D1);
-        _line.SetPosition(13, D);
-        _line.SetPosition(14, C);
-        _line.SetPosition(15, C1);
     }
 
     private void SetOBB()
@@ -252,6 +302,8 @@ public class LineDrawer : MonoBehaviour
         extents = this.transform.localScale * _curExtentsRatio;
 
         Quaternion rotation = this.transform.rotation;
+
+        data.rotation = rotation;
 
         max = extents;
         min = -extents;
@@ -282,29 +334,6 @@ public class LineDrawer : MonoBehaviour
         data.axes[2] = transform.forward;
 
         data.center = center;
-
-        //设置线段数量
-        _line.positionCount = 16;
-        //线的宽度
-        _line.startWidth = _width;
-        _line.endWidth = _width;
-        //根据8点画的_line；
-        _line.SetPosition(0, B1);//前左下
-        _line.SetPosition(1, C1);//前右下
-        _line.SetPosition(2, D1);//后右下
-        _line.SetPosition(3, A1);//后左下
-        _line.SetPosition(4, B1);
-        _line.SetPosition(5, B);//前左上
-        _line.SetPosition(6, C);//前右上
-        _line.SetPosition(7, D);//后右上
-        _line.SetPosition(8, A);//后左上
-        _line.SetPosition(9, B);
-        _line.SetPosition(10, A);
-        _line.SetPosition(11, A1);
-        _line.SetPosition(12, D1);
-        _line.SetPosition(13, D);
-        _line.SetPosition(14, C);
-        _line.SetPosition(15, C1);
     }
 
     private void SetCircle()
@@ -319,44 +348,6 @@ public class LineDrawer : MonoBehaviour
         float radius = 1.732f * extents.x;
         data.radius = radius;
         data.center = center;
-
-        //设置线段数量
-        _line.positionCount = 36 * 3 + 3 + 9;
-        //线的宽度
-        _line.startWidth = _width;
-        _line.endWidth = _width;
-        //根据36点画的_line；
-        for (int i = 0; i < 37; i++)
-        {
-            float x = center.x + radius * Mathf.Sin(i * 10 * Mathf.PI / 180f);
-            float y = center.y + radius * Mathf.Cos(i * 10 * Mathf.PI / 180f);
-            Vector3 pos = new Vector3(x, y, center.z);
-            _line.SetPosition(i, pos);
-        }
-
-        for (int i = 0; i < 37; i++)
-        {
-            float z = center.z + radius * Mathf.Sin(i * 10 * Mathf.PI / 180f);
-            float y = center.y + radius * Mathf.Cos(i * 10 * Mathf.PI / 180f);
-            Vector3 pos = new Vector3(center.x, y, z);
-            _line.SetPosition(i + 37, pos);
-        }
-
-        for (int i = 0; i < 9; i++)
-        {
-            float z = center.z + radius * Mathf.Sin(i * 10 * Mathf.PI / 180f);
-            float y = center.y + radius * Mathf.Cos(i * 10 * Mathf.PI / 180f);
-            Vector3 pos = new Vector3(center.x, y, z);
-            _line.SetPosition(i + 74, pos);
-        }
-
-        for (int i = 0; i < 37; i++)
-        {
-            float x = center.x + radius * Mathf.Sin(i * 10 * Mathf.PI / 180f);
-            float z = center.z + radius * Mathf.Cos(i * 10 * Mathf.PI / 180f);
-            Vector3 pos = new Vector3(x, center.y, z);
-            _line.SetPosition(i + 83, pos);
-        }
     }
 
     private void SetLine()
@@ -369,17 +360,127 @@ public class LineDrawer : MonoBehaviour
         data.center = center;
         data.direction = direction;
 
-        Vector3 origin = center;
-        Vector3 target = center + direction * radius;
+    }
 
-        //设置线段数量
-        _line.positionCount = 2;
-        //线的宽度
-        _line.startWidth = _width;
-        _line.endWidth = _width;
-        //根据8点画的_line；
-        _line.SetPosition(0, origin);//起点
-        _line.SetPosition(1, target);//终点
+    private void SetCapsule()
+    {
+        Vector3 center = transform.position;
+        float radius = _curExtentsRatio * 1.5f;
+        Vector3 direction = transform.rotation * Vector3.up;
+        Vector3 extents = new Vector3(0, _length, 0);
+
+        data.center = center;
+        data.radius = radius;
+        data.direction = direction;
+        data.extents = extents;
+        data.rotation = this.transform.rotation;
+    }
+
+    public void DrawLine()
+    {
+        Gizmos.DrawLine(data.center, data.center + data.direction * data.radius);
+    }
+
+    public void DrawCube(bool isObb = false)
+    {
+        if (isObb)
+        {
+            Matrix4x4 oldMatrix = Gizmos.matrix;
+            Gizmos.matrix = Matrix4x4.TRS(data.center, data.rotation, Vector3.one);
+            Gizmos.DrawWireCube(Vector3.zero, data.extents * 2);
+            Gizmos.matrix = oldMatrix;
+        }
+        else
+        {
+            Gizmos.DrawWireCube(data.center, data.extents * 2);
+        }
+    }
+
+    public void DrawSphere()
+    {
+        Gizmos.DrawWireSphere(data.center, data.radius);
+    }
+
+    void DrawCapsule()
+    {
+        Vector3 pos = data.center;
+        Quaternion rot = data.rotation;
+        float height = data.extents.y * 2;
+        float radius = data.radius;
+        // Calculate points for upper and lower hemispheres
+        Vector3 upCenter = pos + rot * Vector3.up * (height * 0.5f);
+        Vector3 downCenter = pos + rot * Vector3.down * (height * 0.5f);
+
+        // Draw upper hemisphere
+        DrawHemisphere(upCenter, rot, radius, true);
+
+        // Draw lower hemisphere
+        DrawHemisphere(downCenter, rot, radius, false);
+
+        // Draw connecting lines
+        DrawConnectingLines(upCenter, downCenter, rot, radius);
+    }
+
+    void DrawHemisphere(Vector3 center, Quaternion rot, float radius, bool top)
+    {
+        const int numSegments = 36; // Number of segments for drawing the hemisphere
+        float angleStep = 360f / numSegments;
+
+        Vector3 lastPos = Vector3.zero;
+        Vector3 lastPosCircle = Vector3.zero;
+
+        for (int i = 0; i < numSegments; i++)
+        {
+            float angle = i * angleStep;
+            Vector3 point = center + rot * Quaternion.Euler(0, angle, 0) * Vector3.right * radius;
+            Gizmos.DrawLine(point, center);
+
+            if (i > 0)
+            {
+                Gizmos.DrawLine(lastPosCircle, point);
+            }
+            lastPosCircle = point;
+
+            Quaternion rotQ = Quaternion.Euler(0, angle, 0);
+
+            for (int j = 0; j < numSegments * 0.5; j++)
+            {
+                float angleY = top ? AngleToRad(j * angleStep) : AngleToRad(j * -angleStep);
+                Vector3 nextPos = center + rot * rotQ * new Vector3(Mathf.Cos(angleY) * radius, Mathf.Sin(angleY) * radius, 0);
+                if (j > 0)
+                {
+                    Gizmos.DrawLine(lastPos, nextPos);
+                }
+                lastPos = nextPos;
+            }
+        }
+    }
+
+    private float AngleToRad(float angle)
+    {
+        return Mathf.Deg2Rad * angle;
+    }
+
+    void DrawConnectingLines(Vector3 upCenter, Vector3 downCenter, Quaternion rot, float radius)
+    {
+        Vector3[] points = new Vector3[4];
+        const int numSegments = 36; // Number of segments for drawing the hemisphere
+        float angleStep = 360f / numSegments;
+
+        for (int i = 0; i < numSegments; i++)
+        {
+            float angle = i * angleStep;
+            points[0] = upCenter + rot * Quaternion.Euler(0, angle, 0) * Vector3.right * radius;
+            points[1] = downCenter + rot * Quaternion.Euler(0, angle, 0) * Vector3.right * radius;
+
+            //points[2] = upCenter + rot * Quaternion.Euler(0, angle + 90, 0) * Vector3.right * radius;
+            //points[3] = downCenter + rot * Quaternion.Euler(0, angle + 90, 0) * Vector3.right * radius;
+
+            Gizmos.DrawLine(points[0], points[1]);
+            //Gizmos.DrawLine(points[1], points[3]);
+            //Gizmos.DrawLine(points[3], points[2]);
+            //Gizmos.DrawLine(points[2], points[0]);
+        }
     }
 
     /// <summary>
