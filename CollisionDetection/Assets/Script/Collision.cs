@@ -17,7 +17,11 @@ public enum collision
     Line2Circle,
     Line2AABB,
     Line2OBB,
-    Capsule
+    Line2Capsule,
+    Capsule,
+    Capsule2Circle,
+    Capsule2AABB,
+    Capsule2OBB,
 }
 
 public class Collision : MonoBehaviour
@@ -91,8 +95,20 @@ public class Collision : MonoBehaviour
             case collision.Line2OBB:
                 CollisionRay2OBB();
                 break;
+            case collision.Line2Capsule:
+                CollisionRay2Capsule();
+                break;
             case collision.Capsule:
                 CollisionCapsule();
+                break;
+            case collision.Capsule2Circle:
+                CollisionCapsule2Circle();
+                break;
+            case collision.Capsule2AABB:
+                CollisionCapsule2AABB();
+                break;
+            case collision.Capsule2OBB:
+                CollisionCapsule2OBB();
                 break;
         }
     }
@@ -228,7 +244,7 @@ public class Collision : MonoBehaviour
     {
         //求出最近点
         Vector3 center = data1.center;
-        Vector3 nearP = GetClosestPointAABB();
+        Vector3 nearP = GetClosestPointAABB(center, data2);
         //求出最近点与球心的距离
         float distance = (nearP - center).sqrMagnitude;
         float radius = Mathf.Pow(data1.radius, 2);
@@ -249,13 +265,13 @@ public class Collision : MonoBehaviour
     /// 获得一点到AABB最近点
     /// </summary>
     /// <returns></returns>
-    private Vector3 GetClosestPointAABB()
+    private Vector3 GetClosestPointAABB(Vector3 pos, CollisionData other)
     {
-        Vector3 center = data1.center;
+        //Vector3 center = data1.center;
         Vector3 nearP = Vector3.zero;
-        nearP.x = Mathf.Clamp(center.x, data2.min.x, data2.max.x);
-        nearP.y = Mathf.Clamp(center.y, data2.min.y, data2.max.y);
-        nearP.z = Mathf.Clamp(center.z, data2.min.z, data2.max.z);
+        nearP.x = Mathf.Clamp(pos.x, other.min.x, other.max.x);
+        nearP.y = Mathf.Clamp(pos.y, other.min.y, other.max.y);
+        nearP.z = Mathf.Clamp(pos.z, other.min.z, other.max.z);
         return nearP;
     }
 
@@ -265,7 +281,7 @@ public class Collision : MonoBehaviour
     private void CollisionCircle2OBB()
     {
         //求最近点
-        Vector3 nearP = GetClosestPointOBB();
+        Vector3 nearP = GetClosestPointOBB(data1.center,data2);
         //与AABB检测原理相同
         float distance = (nearP - data1.center).sqrMagnitude;
         float radius = Mathf.Pow(data1.radius, 2);
@@ -285,11 +301,11 @@ public class Collision : MonoBehaviour
     /// 获取一点到OBB的最近点
     /// </summary>
     /// <returns></returns>
-    private Vector3 GetClosestPointOBB()
+    private Vector3 GetClosestPointOBB(Vector3 pos,CollisionData other)
     {
         Vector3 nearP = data2.center;
         //求球心与OBB中心的距离向量 从OBB中心指向球心
-        Vector3 center1 = data1.center;
+        Vector3 center1 = pos;
         Vector3 center2 = data2.center;
         Vector3 dist = center1 - center2;
 
@@ -490,6 +506,51 @@ public class Collision : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 射线和球检测
+    /// </summary>
+    private void CollisionRay2Capsule()
+    {
+        //计算头尾点最值
+        Vector3 pointA1 = data1.center;
+        Vector3 pointA2 = data1.center + data1.direction * data1.radius;
+
+        Vector3 pointB1 = data2.center + data2.direction * data2.extents.y;
+        Vector3 pointB2 = data2.center - data2.direction * data2.extents.y;
+
+        Vector3 center = (pointA1 + pointA2) * 0.5f;
+
+        Vector3 closest2;
+
+        if ((pointB1 - center).magnitude <= (pointB2 - center).magnitude)
+        {
+            closest2 = pointB1;
+        }
+        else
+        {
+            closest2 = pointB2;
+        }
+
+        Vector3 closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
+        closest2 = GetClosestPointOnLineSegment(pointB1, pointB2, closest1);
+
+        //求胶囊体半径平方
+        float totalRadius = Mathf.Pow(data2.radius, 2);
+        //求两个点之间的距离
+        float distance = (closest1 - closest2).sqrMagnitude;
+        //距离小于等于半径平方则碰撞
+        if (distance <= totalRadius)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+        }
+    }
+
     //----- Ray ----- end
 
     //----- Capsule ----- start
@@ -534,6 +595,104 @@ public class Collision : MonoBehaviour
         }
     }
 
+    private void CollisionCapsule2Circle()
+    {
+        //计算头尾点最值
+        Vector3 point1 = data1.center + data1.direction * data1.extents.y;
+        Vector3 point2 = data1.center - data1.direction * data1.extents.y;
+
+        Vector3 closest = GetClosestPointOnLineSegment(point1, point2, data2.center);
+
+        //求两个球半径和
+        float totalRadius = Mathf.Pow(data1.radius + data2.radius, 2);
+        //球两个球心之间的距离
+        float distance = (closest - data2.center).sqrMagnitude;
+        //距离小于等于半径和则碰撞
+        if (distance <= totalRadius)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+        }
+    }
+
+    private void CollisionCapsule2AABB()
+    {
+        //计算头尾点最值
+        Vector3 pointA1 = data1.center + data1.direction * data1.extents.y;
+        Vector3 pointA2 = data1.center - data1.direction * data1.extents.y;
+
+        Vector3 closest1;
+
+        if ((pointA1 - data2.center).magnitude <= (pointA2 - data2.center).magnitude)
+        {
+            closest1 = pointA1;
+        }
+        else
+        {
+            closest1 = pointA2;
+        }
+
+        Vector3 closest2 = GetClosestPointAABB(data1.center, data2);
+        closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
+
+        //求胶囊体半径平方
+        float totalRadius = Mathf.Pow(data1.radius, 2);
+        //求两个点之间的距离
+        float distance = (closest1 - closest2).sqrMagnitude;
+        //距离小于等于半径平方则碰撞
+        if (distance <= totalRadius)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+        }
+    }
+
+    private void CollisionCapsule2OBB()
+    {
+        //计算头尾点最值
+        Vector3 pointA1 = data1.center + data1.direction * data1.extents.y;
+        Vector3 pointA2 = data1.center - data1.direction * data1.extents.y;
+
+        Vector3 closest1;
+
+        if ((pointA1 - data2.center).magnitude <= (pointA2 - data2.center).magnitude)
+        {
+            closest1 = pointA1;
+        }
+        else
+        {
+            closest1 = pointA2;
+        }
+
+        Vector3 closest2 = GetClosestPointOBB(data1.center, data2);
+        closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
+
+        //求胶囊体半径平方
+        float totalRadius = Mathf.Pow(data1.radius, 2);
+        //求两个点之间的距离
+        float distance = (closest1 - closest2).sqrMagnitude;
+        //距离小于等于半径平方则碰撞
+        if (distance <= totalRadius)
+        {
+            line1.Collided(true);
+            line2.Collided(true);
+        }
+        else
+        {
+            line1.Collided(false);
+            line2.Collided(false);
+        }
+    }
 
 
     //----- Capsule ----- end

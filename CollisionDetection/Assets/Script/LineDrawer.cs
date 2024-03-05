@@ -173,8 +173,48 @@ public class LineDrawer : MonoBehaviour
                     SetOBB();
                 }
                 break;
+            case collision.Line2Capsule:
+                if (tag == "Change")
+                {
+                    SetLine();
+                }
+                else
+                {
+                    SetCapsule();
+                }
+                break;
             case collision.Capsule:
                 SetCapsule();
+                break;
+            case collision.Capsule2Circle:
+                if (tag == "Change")
+                {
+                    SetCapsule();
+                }
+                else
+                {
+                    SetCircle();
+                }
+                break;
+            case collision.Capsule2AABB:
+                if (tag == "Change")
+                {
+                    SetCapsule();
+                }
+                else
+                {
+                    SetAABB();
+                }
+                break;
+            case collision.Capsule2OBB:
+                if (tag == "Change")
+                {
+                    SetCapsule();
+                }
+                else
+                {
+                    SetOBB();
+                }
                 break;
             case collision.AABB:
             default:
@@ -245,8 +285,48 @@ public class LineDrawer : MonoBehaviour
                     DrawCube(true);
                 }
                 break;
+            case collision.Line2Capsule:
+                if (tag == "Change")
+                {
+                    DrawLine();
+                }
+                else
+                {
+                    DrawCapsule();
+                }
+                break;
             case collision.Capsule:
                 DrawCapsule();
+                break;
+            case collision.Capsule2Circle:
+                if(tag == "Change")
+                {
+                    DrawCapsule();
+                }
+                else
+                {
+                    DrawSphere();
+                }
+                break;
+            case collision.Capsule2AABB:
+                if (tag == "Change")
+                {
+                    DrawCapsule();
+                }
+                else
+                {
+                    DrawCube();
+                }
+                break;
+            case collision.Capsule2OBB:
+                if (tag == "Change")
+                {
+                    DrawCapsule();
+                }
+                else
+                {
+                    DrawCube(true);
+                }
                 break;
             case collision.AABB:
             default:
