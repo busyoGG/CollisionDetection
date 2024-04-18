@@ -116,11 +116,11 @@ public class Collision : MonoBehaviour
     //----- AABB ----- start
 
     /// <summary>
-    /// AABB¼ì²â
+    /// AABBæ£€æµ‹
     /// </summary>
     private void CollisionAABB()
     {
-        //°üÎ§ºĞ1µÄ×îĞ¡Öµ±È°üÎ§ºĞ2µÄ×î´óÖµ»¹´ó »ò °üÎ§ºĞ1µÄ×î´óÖµ±È°üÎ§ºĞ2µÄ×îĞ¡Öµ»¹Ğ¡ Ôò²»Åö×²
+        //åŒ…å›´ç›’1çš„æœ€å°å€¼æ¯”åŒ…å›´ç›’2çš„æœ€å¤§å€¼è¿˜å¤§ æˆ– åŒ…å›´ç›’1çš„æœ€å¤§å€¼æ¯”åŒ…å›´ç›’2çš„æœ€å°å€¼è¿˜å° åˆ™ä¸ç¢°æ’
         if (data1.max.x < data2.min.x || data1.max.y < data2.min.y || data1.max.z < data2.min.z ||
             data1.min.x > data2.max.x || data1.min.y > data2.max.y || data1.min.z > data2.max.z)
         {
@@ -139,11 +139,11 @@ public class Collision : MonoBehaviour
     //----- OBB ----- start
 
     /// <summary>
-    /// SAT·ÖÀëÖáÅö×²¼ì²âÖ®OBB¼ì²â
+    /// SATåˆ†ç¦»è½´ç¢°æ’æ£€æµ‹ä¹‹OBBæ£€æµ‹
     /// </summary>
     private void CollisionOBB()
     {
-        //ÇóÁ½¸öOBB°üÎ§ºĞÖ®¼äÁ½Á½×ø±êÖáµÄ·¨Æ½ÃæÖá ¹²9¸ö
+        //æ±‚ä¸¤ä¸ªOBBåŒ…å›´ç›’ä¹‹é—´ä¸¤ä¸¤åæ ‡è½´çš„æ³•å¹³é¢è½´ å…±9ä¸ª
         int len1 = data1.axes.Length;
         int len2 = data2.axes.Length;
         Vector3[] axes = new Vector3[len1 + len2 + len1 * len2];
@@ -168,7 +168,7 @@ public class Collision : MonoBehaviour
         {
             if (NotInteractiveOBB(data1.vertexts, data2.vertexts, axes[i]))
             {
-                //ÓĞÒ»¸ö²»Ïà½»¾ÍÍË³ö
+                //æœ‰ä¸€ä¸ªä¸ç›¸äº¤å°±é€€å‡º
                 line1.Collided(false);
                 line2.Collided(false);
                 return;
@@ -179,7 +179,7 @@ public class Collision : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ÆËãÍ¶Ó°ÊÇ·ñ²»Ïà½»
+    /// è®¡ç®—æŠ•å½±æ˜¯å¦ä¸ç›¸äº¤
     /// </summary>
     /// <param name="vertexs1"></param>
     /// <param name="vertexs2"></param>
@@ -187,15 +187,15 @@ public class Collision : MonoBehaviour
     /// <returns></returns>
     private bool NotInteractiveOBB(Vector3[] vertexs1, Vector3[] vertexs2, Vector3 axis)
     {
-        //¼ÆËãOBB°üÎ§ºĞÔÚ·ÖÀëÖáÉÏµÄÍ¶Ó°¼«ÏŞÖµ
+        //è®¡ç®—OBBåŒ…å›´ç›’åœ¨åˆ†ç¦»è½´ä¸Šçš„æŠ•å½±æé™å€¼
         float[] limit1 = GetProjectionLimit(vertexs1, axis);
         float[] limit2 = GetProjectionLimit(vertexs2, axis);
-        //Á½¸ö°üÎ§ºĞ¼«ÏŞÖµ²»Ïà½»£¬Ôò²»Åö×²
+        //ä¸¤ä¸ªåŒ…å›´ç›’æé™å€¼ä¸ç›¸äº¤ï¼Œåˆ™ä¸ç¢°æ’
         return limit1[0] > limit2[1] || limit2[0] > limit1[1];
     }
 
     /// <summary>
-    /// ¼ÆËã¶¥µãÍ¶Ó°¼«ÏŞÖµ
+    /// è®¡ç®—é¡¶ç‚¹æŠ•å½±æé™å€¼
     /// </summary>
     /// <param name="vertexts"></param>
     /// <param name="axis"></param>
@@ -216,15 +216,15 @@ public class Collision : MonoBehaviour
 
     //----- Circle ----- start
     /// <summary>
-    /// ÇòÓëÇò¼ì²â
+    /// çƒä¸çƒæ£€æµ‹
     /// </summary>
     private void CollisionCircle()
     {
-        //ÇóÁ½¸öÇò°ë¾¶ºÍ
+        //æ±‚ä¸¤ä¸ªçƒåŠå¾„å’Œ
         float totalRadius = Mathf.Pow(data1.radius + data2.radius, 2);
-        //ÇòÁ½¸öÇòĞÄÖ®¼äµÄ¾àÀë
+        //çƒä¸¤ä¸ªçƒå¿ƒä¹‹é—´çš„è·ç¦»
         float distance = (data1.center - data2.center).sqrMagnitude;
-        //¾àÀëĞ¡ÓÚµÈÓÚ°ë¾¶ºÍÔòÅö×²
+        //è·ç¦»å°äºç­‰äºåŠå¾„å’Œåˆ™ç¢°æ’
         if (distance <= totalRadius)
         {
             line1.Collided(true);
@@ -238,17 +238,17 @@ public class Collision : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇòÓëAABB¼ì²â
+    /// çƒä¸AABBæ£€æµ‹
     /// </summary>
     private void CollisionCircle2AABB()
     {
-        //Çó³ö×î½üµã
+        //æ±‚å‡ºæœ€è¿‘ç‚¹
         Vector3 center = data1.center;
         Vector3 nearP = GetClosestPointAABB(center, data2);
-        //Çó³ö×î½üµãÓëÇòĞÄµÄ¾àÀë
+        //æ±‚å‡ºæœ€è¿‘ç‚¹ä¸çƒå¿ƒçš„è·ç¦»
         float distance = (nearP - center).sqrMagnitude;
         float radius = Mathf.Pow(data1.radius, 2);
-        //¾àÀëĞ¡ÓÚ°ë¾¶ÔòÅö×²
+        //è·ç¦»å°äºåŠå¾„åˆ™ç¢°æ’
         if (distance <= radius)
         {
             line1.Collided(true);
@@ -262,7 +262,7 @@ public class Collision : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñµÃÒ»µãµ½AABB×î½üµã
+    /// è·å¾—ä¸€ç‚¹åˆ°AABBæœ€è¿‘ç‚¹
     /// </summary>
     /// <returns></returns>
     private Vector3 GetClosestPointAABB(Vector3 pos, CollisionData other)
@@ -276,13 +276,13 @@ public class Collision : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇòÓëOBB¼ì²â
+    /// çƒä¸OBBæ£€æµ‹
     /// </summary>
     private void CollisionCircle2OBB()
     {
-        //Çó×î½üµã
+        //æ±‚æœ€è¿‘ç‚¹
         Vector3 nearP = GetClosestPointOBB(data1.center,data2);
-        //ÓëAABB¼ì²âÔ­ÀíÏàÍ¬
+        //ä¸AABBæ£€æµ‹åŸç†ç›¸åŒ
         float distance = (nearP - data1.center).sqrMagnitude;
         float radius = Mathf.Pow(data1.radius, 2);
         if (distance <= radius)
@@ -298,13 +298,13 @@ public class Collision : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñÈ¡Ò»µãµ½OBBµÄ×î½üµã
+    /// è·å–ä¸€ç‚¹åˆ°OBBçš„æœ€è¿‘ç‚¹
     /// </summary>
     /// <returns></returns>
     private Vector3 GetClosestPointOBB(Vector3 pos,CollisionData other)
     {
         Vector3 nearP = data2.center;
-        //ÇóÇòĞÄÓëOBBÖĞĞÄµÄ¾àÀëÏòÁ¿ ´ÓOBBÖĞĞÄÖ¸ÏòÇòĞÄ
+        //æ±‚çƒå¿ƒä¸OBBä¸­å¿ƒçš„è·ç¦»å‘é‡ ä»OBBä¸­å¿ƒæŒ‡å‘çƒå¿ƒ
         Vector3 center1 = pos;
         Vector3 center2 = data2.center;
         Vector3 dist = center1 - center2;
@@ -314,10 +314,10 @@ public class Collision : MonoBehaviour
 
         for (int i = 0; i < 3; i++)
         {
-            //¼ÆËã¾àÀëÏòÁ¿µ½OBB×ø±êÖáµÄÍ¶Ó°³¤¶È ¼´¾àÀëÏòÁ¿ÔÚOBB×ø±êÏµÖĞµÄ¶ÔÓ¦×ø±êÖáµÄ³¤¶È
+            //è®¡ç®—è·ç¦»å‘é‡åˆ°OBBåæ ‡è½´çš„æŠ•å½±é•¿åº¦ å³è·ç¦»å‘é‡åœ¨OBBåæ ‡ç³»ä¸­çš„å¯¹åº”åæ ‡è½´çš„é•¿åº¦
             float distance = Vector3.Dot(dist, axes[i]);
             distance = Mathf.Clamp(distance, -extents[i], extents[i]);
-            //»¹Ô­µ½ÊÀ½ç×ø±ê
+            //è¿˜åŸåˆ°ä¸–ç•Œåæ ‡
             nearP.x += distance * axes[i].x;
             nearP.y += distance * axes[i].y;
             nearP.z += distance * axes[i].z;
@@ -330,7 +330,7 @@ public class Collision : MonoBehaviour
     //----- Ray ----- start
 
     /// <summary>
-    /// ÉäÏßºÍÇò¼ì²â
+    /// å°„çº¿å’Œçƒæ£€æµ‹
     /// </summary>
     private void CollisionRay2Circle()
     {
@@ -342,13 +342,13 @@ public class Collision : MonoBehaviour
         float r2 = Mathf.Pow(data2.radius, 2);
         float f = Mathf.Pow(projection, 2) + r2 - centerDis.sqrMagnitude;
 
-        //·½ÏòÏà·´
+        //æ–¹å‘ç›¸å
         bool checkDirection = projection < 0;
-        //ÉäÏß¹ı¶Ì
+        //å°„çº¿è¿‡çŸ­
         bool checkDistance = centerDis.sqrMagnitude > Mathf.Pow(data1.radius + data2.radius, 2);
-        //ÉäÏßÆğµãÔÚÇòÄÚ²¿
+        //å°„çº¿èµ·ç‚¹åœ¨çƒå†…éƒ¨
         bool checkNotInside = centerDis.sqrMagnitude > r2;
-        //²»Ïà½»
+        //ä¸ç›¸äº¤
         bool checkNotCollide = f < 0;
 
         if (checkNotInside && (checkDirection || checkDistance || checkNotCollide))
@@ -363,16 +363,16 @@ public class Collision : MonoBehaviour
 
         float dis = projection - Mathf.Sqrt(f) * (checkNotInside ? 1 : -1);
         Vector3 point = data1.center + data1.direction * dis;
-        ConsoleUtils.Log("Åö×²µã", point);
+        ConsoleUtils.Log("ç¢°æ’ç‚¹", point);
     }
 
     private void CollisionRay2AABB()
     {
-        //ÅĞ¶ÏÊÇ·ñ²»ÔÚAABBÄÚ
+        //åˆ¤æ–­æ˜¯å¦ä¸åœ¨AABBå†…
         bool checkNotInside = data1.center.x > data2.max.x || data1.center.x < data2.min.x ||
             data1.center.y > data2.max.y || data1.center.y < data2.min.y ||
             data1.center.z > data2.max.z || data1.center.z < data2.min.z;
-        //ÅĞ¶Ï·´ÏòÇé¿ö
+        //åˆ¤æ–­åå‘æƒ…å†µ
         bool checkForawd = Vector3.Dot(data2.center - data1.center, data1.direction) < 0;
         if (checkNotInside && checkForawd)
         {
@@ -381,7 +381,7 @@ public class Collision : MonoBehaviour
             return;
         }
 
-        //ÅĞ¶ÏÊÇ·ñÏà½»
+        //åˆ¤æ–­æ˜¯å¦ç›¸äº¤
         Vector3 min = data2.min - data1.center;
         Vector3 max = data2.max - data1.center;
 
@@ -403,7 +403,7 @@ public class Collision : MonoBehaviour
             line2.Collided(true);
             Vector3 point = data1.center + data1.direction * f;
 
-            ConsoleUtils.Log("Åö×²µã", point);
+            ConsoleUtils.Log("ç¢°æ’ç‚¹", point);
         }
         else
         {
@@ -421,13 +421,13 @@ public class Collision : MonoBehaviour
 
             Vector3 point = data1.center + data1.direction * n;
 
-            ConsoleUtils.Log("Åö×²µã", point);
+            ConsoleUtils.Log("ç¢°æ’ç‚¹", point);
         }
     }
 
     private void CollisionRay2OBB()
     {
-        //ÅĞ¶Ï²»ÔÚOBBÄÚ
+        //åˆ¤æ–­ä¸åœ¨OBBå†…
         Vector3 centerDis = data1.center - data2.center;
         float ray2ObbX = Vector3.Dot(centerDis, data2.axes[0]);
         float ray2ObbY = Vector3.Dot(centerDis, data2.axes[1]);
@@ -435,7 +435,7 @@ public class Collision : MonoBehaviour
         bool checkNotInside = ray2ObbX < -data2.extents[0] || ray2ObbX > data2.extents[0] ||
             ray2ObbY < -data2.extents[1] || ray2ObbY > data2.extents[1] ||
             ray2ObbZ < -data2.extents[2] || ray2ObbZ > data2.extents[2];
-        //ÅĞ¶Ï·´ÏòÇé¿ö
+        //åˆ¤æ–­åå‘æƒ…å†µ
         bool checkFoward = Vector3.Dot(data2.center - data1.center, data1.direction) < 0;
         if (checkNotInside && checkFoward)
         {
@@ -444,7 +444,7 @@ public class Collision : MonoBehaviour
             return;
         }
 
-        //ÅĞ¶ÏÊÇ·ñÏà½»
+        //åˆ¤æ–­æ˜¯å¦ç›¸äº¤
         Vector3 min = Vector3.zero;
         Vector3 minP = data2.vertexts[4] - data1.center;
         min.x = Vector3.Dot(minP, data2.axes[0]);
@@ -484,7 +484,7 @@ public class Collision : MonoBehaviour
             line2.Collided(true);
             Vector3 point = data1.center + data1.direction * f;
 
-            ConsoleUtils.Log("Åö×²µã", point);
+            ConsoleUtils.Log("ç¢°æ’ç‚¹", point);
         }
         else
         {
@@ -502,16 +502,16 @@ public class Collision : MonoBehaviour
 
             Vector3 point = data1.center + data1.direction * n;
 
-            ConsoleUtils.Log("Åö×²µã", point);
+            ConsoleUtils.Log("ç¢°æ’ç‚¹", point);
         }
     }
 
     /// <summary>
-    /// ÉäÏßºÍÇò¼ì²â
+    /// å°„çº¿å’Œèƒ¶å›Šä½“æ£€æµ‹
     /// </summary>
     private void CollisionRay2Capsule()
     {
-        //¼ÆËãÍ·Î²µã×îÖµ
+        //è®¡ç®—å¤´å°¾ç‚¹æœ€å€¼
         Vector3 pointA1 = data1.center;
         Vector3 pointA2 = data1.center + data1.direction * data1.radius;
 
@@ -534,11 +534,11 @@ public class Collision : MonoBehaviour
         Vector3 closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
         closest2 = GetClosestPointOnLineSegment(pointB1, pointB2, closest1);
 
-        //Çó½ºÄÒÌå°ë¾¶Æ½·½
+        //æ±‚èƒ¶å›Šä½“åŠå¾„å¹³æ–¹
         float totalRadius = Mathf.Pow(data2.radius, 2);
-        //ÇóÁ½¸öµãÖ®¼äµÄ¾àÀë
+        //æ±‚ä¸¤ä¸ªç‚¹ä¹‹é—´çš„è·ç¦»
         float distance = (closest1 - closest2).sqrMagnitude;
-        //¾àÀëĞ¡ÓÚµÈÓÚ°ë¾¶Æ½·½ÔòÅö×²
+        //è·ç¦»å°äºç­‰äºåŠå¾„å¹³æ–¹åˆ™ç¢°æ’
         if (distance <= totalRadius)
         {
             line1.Collided(true);
@@ -557,7 +557,7 @@ public class Collision : MonoBehaviour
 
     private void CollisionCapsule()
     {
-        //¼ÆËãÍ·Î²µã×îÖµ
+        //è®¡ç®—å¤´å°¾ç‚¹æœ€å€¼
         Vector3 pointA1 = data1.center + data1.direction * data1.extents.y;
         Vector3 pointA2 = data1.center - data1.direction * data1.extents.y;
 
@@ -578,11 +578,11 @@ public class Collision : MonoBehaviour
         Vector3 closest2 = GetClosestPointOnLineSegment(pointB1, pointB2, closest1);
         closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
 
-        //ÇóÁ½¸öÇò°ë¾¶ºÍ
+        //æ±‚ä¸¤ä¸ªçƒåŠå¾„å’Œ
         float totalRadius = Mathf.Pow(data1.radius + data2.radius, 2);
-        //ÇòÁ½¸öÇòĞÄÖ®¼äµÄ¾àÀë
+        //çƒä¸¤ä¸ªçƒå¿ƒä¹‹é—´çš„è·ç¦»
         float distance = (closest1 - closest2).sqrMagnitude;
-        //¾àÀëĞ¡ÓÚµÈÓÚ°ë¾¶ºÍÔòÅö×²
+        //è·ç¦»å°äºç­‰äºåŠå¾„å’Œåˆ™ç¢°æ’
         if (distance <= totalRadius)
         {
             line1.Collided(true);
@@ -597,17 +597,17 @@ public class Collision : MonoBehaviour
 
     private void CollisionCapsule2Circle()
     {
-        //¼ÆËãÍ·Î²µã×îÖµ
+        //è®¡ç®—å¤´å°¾ç‚¹æœ€å€¼
         Vector3 point1 = data1.center + data1.direction * data1.extents.y;
         Vector3 point2 = data1.center - data1.direction * data1.extents.y;
 
         Vector3 closest = GetClosestPointOnLineSegment(point1, point2, data2.center);
 
-        //ÇóÁ½¸öÇò°ë¾¶ºÍ
+        //æ±‚ä¸¤ä¸ªçƒåŠå¾„å’Œ
         float totalRadius = Mathf.Pow(data1.radius + data2.radius, 2);
-        //ÇòÁ½¸öÇòĞÄÖ®¼äµÄ¾àÀë
+        //çƒä¸¤ä¸ªçƒå¿ƒä¹‹é—´çš„è·ç¦»
         float distance = (closest - data2.center).sqrMagnitude;
-        //¾àÀëĞ¡ÓÚµÈÓÚ°ë¾¶ºÍÔòÅö×²
+        //è·ç¦»å°äºç­‰äºåŠå¾„å’Œåˆ™ç¢°æ’
         if (distance <= totalRadius)
         {
             line1.Collided(true);
@@ -622,7 +622,7 @@ public class Collision : MonoBehaviour
 
     private void CollisionCapsule2AABB()
     {
-        //¼ÆËãÍ·Î²µã×îÖµ
+        //è®¡ç®—å¤´å°¾ç‚¹æœ€å€¼
         Vector3 pointA1 = data1.center + data1.direction * data1.extents.y;
         Vector3 pointA2 = data1.center - data1.direction * data1.extents.y;
 
@@ -637,14 +637,14 @@ public class Collision : MonoBehaviour
             closest1 = pointA2;
         }
 
-        Vector3 closest2 = GetClosestPointAABB(data1.center, data2);
+        Vector3 closest2 = GetClosestPointAABB(closest1, data2);
         closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
 
-        //Çó½ºÄÒÌå°ë¾¶Æ½·½
+        //æ±‚èƒ¶å›Šä½“åŠå¾„å¹³æ–¹
         float totalRadius = Mathf.Pow(data1.radius, 2);
-        //ÇóÁ½¸öµãÖ®¼äµÄ¾àÀë
+        //æ±‚ä¸¤ä¸ªç‚¹ä¹‹é—´çš„è·ç¦»
         float distance = (closest1 - closest2).sqrMagnitude;
-        //¾àÀëĞ¡ÓÚµÈÓÚ°ë¾¶Æ½·½ÔòÅö×²
+        //è·ç¦»å°äºç­‰äºåŠå¾„å¹³æ–¹åˆ™ç¢°æ’
         if (distance <= totalRadius)
         {
             line1.Collided(true);
@@ -659,7 +659,7 @@ public class Collision : MonoBehaviour
 
     private void CollisionCapsule2OBB()
     {
-        //¼ÆËãÍ·Î²µã×îÖµ
+        //è®¡ç®—å¤´å°¾ç‚¹æœ€å€¼
         Vector3 pointA1 = data1.center + data1.direction * data1.extents.y;
         Vector3 pointA2 = data1.center - data1.direction * data1.extents.y;
 
@@ -674,14 +674,14 @@ public class Collision : MonoBehaviour
             closest1 = pointA2;
         }
 
-        Vector3 closest2 = GetClosestPointOBB(data1.center, data2);
+        Vector3 closest2 = GetClosestPointOBB(closest1, data2);
         closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
 
-        //Çó½ºÄÒÌå°ë¾¶Æ½·½
+        //æ±‚èƒ¶å›Šä½“åŠå¾„å¹³æ–¹
         float totalRadius = Mathf.Pow(data1.radius, 2);
-        //ÇóÁ½¸öµãÖ®¼äµÄ¾àÀë
+        //æ±‚ä¸¤ä¸ªç‚¹ä¹‹é—´çš„è·ç¦»
         float distance = (closest1 - closest2).sqrMagnitude;
-        //¾àÀëĞ¡ÓÚµÈÓÚ°ë¾¶Æ½·½ÔòÅö×²
+        //è·ç¦»å°äºç­‰äºåŠå¾„å¹³æ–¹åˆ™ç¢°æ’
         if (distance <= totalRadius)
         {
             line1.Collided(true);
@@ -697,9 +697,9 @@ public class Collision : MonoBehaviour
 
     //----- Capsule ----- end
 
-    //TODO GJK¼ì²â
+    //TODO GJKæ£€æµ‹
 
-    //¹¤¾ßº¯Êı
+    //å·¥å…·å‡½æ•°
 
     private void Swap(ref float one, ref float two)
     {
@@ -712,7 +712,7 @@ public class Collision : MonoBehaviour
     private Vector3 GetClosestPointOnLineSegment(Vector3 start, Vector3 end, Vector3 point)
     {
         Vector3 line = end - start;
-        //dot line line Çó³¤¶ÈÆ½·½
+        //dot line line æ±‚é•¿åº¦å¹³æ–¹
         float ratio = Vector3.Dot(point - start, line) / Vector3.Dot(line, line);
         ratio = Mathf.Min(Mathf.Max(ratio, 0), 1);
         return start + ratio * line;
