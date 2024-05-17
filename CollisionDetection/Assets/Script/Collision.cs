@@ -26,10 +26,8 @@ public enum collision
 
 public class Collision : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject obj1;
-    [SerializeField]
-    private GameObject obj2;
+    [SerializeField] private GameObject obj1;
+    [SerializeField] private GameObject obj2;
 
     private CollisionData data1 = null;
     private CollisionData data2 = null;
@@ -37,8 +35,7 @@ public class Collision : MonoBehaviour
     private LineDrawer line1 = null;
     private LineDrawer line2 = null;
 
-    [SerializeField]
-    collision _collision = collision.AABB;
+    [SerializeField] collision _collision = collision.AABB;
 
 
     // Start is called before the first frame update
@@ -54,7 +51,6 @@ public class Collision : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         if (line1.changed || line2.changed)
         {
             ChangeCollision(_collision);
@@ -159,6 +155,7 @@ public class Collision : MonoBehaviour
                     initJ--;
                     axes[k++] = data2.axes[j];
                 }
+
                 axes[k++] = Vector3.Cross(data1.axes[i], data2.axes[j]);
             }
         }
@@ -174,6 +171,7 @@ public class Collision : MonoBehaviour
                 return;
             }
         }
+
         line1.Collided(true);
         line2.Collided(true);
     }
@@ -210,6 +208,7 @@ public class Collision : MonoBehaviour
             result[0] = Mathf.Min(dot, result[0]);
             result[1] = Mathf.Max(dot, result[1]);
         }
+
         return result;
     }
     //----- OBB ----- end
@@ -281,7 +280,7 @@ public class Collision : MonoBehaviour
     private void CollisionCircle2OBB()
     {
         //求最近点
-        Vector3 nearP = GetClosestPointOBB(data1.center,data2);
+        Vector3 nearP = GetClosestPointOBB(data1.center, data2);
         //与AABB检测原理相同
         float distance = (nearP - data1.center).sqrMagnitude;
         float radius = Mathf.Pow(data1.radius, 2);
@@ -301,7 +300,7 @@ public class Collision : MonoBehaviour
     /// 获取一点到OBB的最近点
     /// </summary>
     /// <returns></returns>
-    private Vector3 GetClosestPointOBB(Vector3 pos,CollisionData other)
+    private Vector3 GetClosestPointOBB(Vector3 pos, CollisionData other)
     {
         Vector3 nearP = data2.center;
         //求球心与OBB中心的距离向量 从OBB中心指向球心
@@ -322,6 +321,7 @@ public class Collision : MonoBehaviour
             nearP.y += distance * axes[i].y;
             nearP.z += distance * axes[i].z;
         }
+
         return nearP;
     }
 
@@ -334,7 +334,6 @@ public class Collision : MonoBehaviour
     /// </summary>
     private void CollisionRay2Circle()
     {
-
         Vector3 centerDis = data2.center - data1.center;
         Vector3 direction = data1.direction;
 
@@ -370,8 +369,8 @@ public class Collision : MonoBehaviour
     {
         //判断是否不在AABB内
         bool checkNotInside = data1.center.x > data2.max.x || data1.center.x < data2.min.x ||
-            data1.center.y > data2.max.y || data1.center.y < data2.min.y ||
-            data1.center.z > data2.max.z || data1.center.z < data2.min.z;
+                              data1.center.y > data2.max.y || data1.center.y < data2.min.y ||
+                              data1.center.z > data2.max.z || data1.center.z < data2.min.z;
         //判断反向情况
         bool checkForawd = Vector3.Dot(data2.center - data1.center, data1.direction) < 0;
         if (checkNotInside && checkForawd)
@@ -433,8 +432,8 @@ public class Collision : MonoBehaviour
         float ray2ObbY = Vector3.Dot(centerDis, data2.axes[1]);
         float ray2ObbZ = Vector3.Dot(centerDis, data2.axes[2]);
         bool checkNotInside = ray2ObbX < -data2.extents[0] || ray2ObbX > data2.extents[0] ||
-            ray2ObbY < -data2.extents[1] || ray2ObbY > data2.extents[1] ||
-            ray2ObbZ < -data2.extents[2] || ray2ObbZ > data2.extents[2];
+                              ray2ObbY < -data2.extents[1] || ray2ObbY > data2.extents[1] ||
+                              ray2ObbZ < -data2.extents[2] || ray2ObbZ > data2.extents[2];
         //判断反向情况
         bool checkFoward = Vector3.Dot(data2.center - data1.center, data1.direction) < 0;
         if (checkNotInside && checkFoward)
@@ -564,24 +563,27 @@ public class Collision : MonoBehaviour
         Vector3 pointB1 = data2.center + data2.direction * data2.extents.y;
         Vector3 pointB2 = data2.center - data2.direction * data2.extents.y;
 
-        Vector3 closest1;
+        // Vector3 closest1;
+        //
+        // if ((pointA1 - data2.center).magnitude <= (pointA2 - data2.center).magnitude)
+        // {
+        //     closest1 = pointA1;
+        // }
+        // else
+        // {
+        //     closest1 = pointA2;
+        // }
+        //
+        // Vector3 closest2 = GetClosestPointOnLineSegment(pointB1, pointB2, closest1);
+        // closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
 
-        if ((pointA1 - data2.center).magnitude <= (pointA2 - data2.center).magnitude)
-        {
-            closest1 = pointA1;
-        }
-        else
-        {
-            closest1 = pointA2;
-        }
-
-        Vector3 closest2 = GetClosestPointOnLineSegment(pointB1, pointB2, closest1);
-        closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
+        // 求两条线段的最短距离
+        float distance = GetClosestDistanceBetweenLinesSqr(pointA1, pointA2, pointB1, pointB2);
 
         //求两个球半径和
         float totalRadius = Mathf.Pow(data1.radius + data2.radius, 2);
-        //球两个球心之间的距离
-        float distance = (closest1 - closest2).sqrMagnitude;
+        // //球两个球心之间的距离
+        // float distance = (closest1 - closest2).sqrMagnitude;
         //距离小于等于半径和则碰撞
         if (distance <= totalRadius)
         {
@@ -626,19 +628,8 @@ public class Collision : MonoBehaviour
         Vector3 pointA1 = data1.center + data1.direction * data1.extents.y;
         Vector3 pointA2 = data1.center - data1.direction * data1.extents.y;
 
-        Vector3 closest1;
-
-        if ((pointA1 - data2.center).magnitude <= (pointA2 - data2.center).magnitude)
-        {
-            closest1 = pointA1;
-        }
-        else
-        {
-            closest1 = pointA2;
-        }
-
+        Vector3 closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, data2.center);
         Vector3 closest2 = GetClosestPointAABB(closest1, data2);
-        closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
 
         //求胶囊体半径平方
         float totalRadius = Mathf.Pow(data1.radius, 2);
@@ -663,19 +654,8 @@ public class Collision : MonoBehaviour
         Vector3 pointA1 = data1.center + data1.direction * data1.extents.y;
         Vector3 pointA2 = data1.center - data1.direction * data1.extents.y;
 
-        Vector3 closest1;
-
-        if ((pointA1 - data2.center).magnitude <= (pointA2 - data2.center).magnitude)
-        {
-            closest1 = pointA1;
-        }
-        else
-        {
-            closest1 = pointA2;
-        }
-
+        Vector3 closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, data2.center);
         Vector3 closest2 = GetClosestPointOBB(closest1, data2);
-        closest1 = GetClosestPointOnLineSegment(pointA1, pointA2, closest2);
 
         //求胶囊体半径平方
         float totalRadius = Mathf.Pow(data1.radius, 2);
@@ -716,5 +696,107 @@ public class Collision : MonoBehaviour
         float ratio = Vector3.Dot(point - start, line) / Vector3.Dot(line, line);
         ratio = Mathf.Min(Mathf.Max(ratio, 0), 1);
         return start + ratio * line;
+    }
+
+    /// <summary>
+    /// 求两条线段的最短距离
+    /// </summary>
+    /// <param name="start1"></param>
+    /// <param name="end1"></param>
+    /// <param name="start2"></param>
+    /// <param name="end2"></param>
+    /// <returns></returns>
+    private float GetClosestDistanceBetweenLinesSqr(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2)
+    {
+        Vector3 line1 = end1 - start1;
+        Vector3 line2 = end2 - start2;
+
+        float dis = 0;
+        //判断完全平行
+        bool isParallel = line1.normalized == line2.normalized;
+        if (isParallel)
+        {
+            //完全平行
+            float disStart1 = (GetClosestPointOnLineSegment(start1, end1, start2) - start2).sqrMagnitude;
+            float disEnd1 = (GetClosestPointOnLineSegment(start1, end1, end2) - end2).sqrMagnitude;
+
+            dis = Mathf.Min(disStart1, disEnd1);
+        }
+        else
+        {
+            Vector3 normal = Vector3.Cross(line1, line2);
+            float len = normal.sqrMagnitude;
+            float dis2Line = Mathf.Pow(Mathf.Abs(Vector3.Dot(start2 - start1, normal)), 2) / len;
+            //判断同面
+            if (dis2Line == 0)
+            {
+                //同面
+                // 检测线段相交
+                bool isLineCross = CheckLineCross(start1, end1, start2, end2);
+                if (isLineCross)
+                {
+                    dis = 0;
+                }
+                else
+                {
+                    float disStart1 = (GetClosestPointOnLineSegment(start1, end1, start2) - start2).sqrMagnitude;
+                    float disEnd1 = (GetClosestPointOnLineSegment(start1, end1, end2) - end2).sqrMagnitude;
+                    float disStart2 = (GetClosestPointOnLineSegment(start2, end2, start1) - start1).sqrMagnitude;
+                    float disEnd2 = (GetClosestPointOnLineSegment(start2, end2, end1) - end1).sqrMagnitude;
+                    dis = Mathf.Min(disStart1, disEnd1, disStart2, disEnd2);
+                }
+            }
+            else
+            {
+                float offset = Mathf.Sqrt(dis2Line);
+                //计算line2相对line1的方位
+                Vector3 directionStart = start2 - start1;
+                float direction = Vector3.Dot(directionStart, normal) > 0 ? 1 : -1;
+                // 检测线段相交
+                bool isLineCross = CheckLineCross(start1, end1, start2 - normal.normalized * (offset * direction),
+                    end2 - normal.normalized * (offset * direction)); 
+
+                if (isLineCross)
+                {
+                    dis = dis2Line;
+                }
+                else
+                {
+                    float disStart1 = (GetClosestPointOnLineSegment(start1, end1, start2) - start2).sqrMagnitude;
+                    float disEnd1 = (GetClosestPointOnLineSegment(start1, end1, end2) - end2).sqrMagnitude;
+                    float disStart2 = (GetClosestPointOnLineSegment(start2, end2, start1) - start1).sqrMagnitude;
+                    float disEnd2 = (GetClosestPointOnLineSegment(start2, end2, end1) - end1).sqrMagnitude;
+                    dis = Mathf.Min(disStart1, disEnd1, disStart2, disEnd2);
+                }
+            }
+        }
+
+        return dis;
+    }
+
+    private bool CheckLineCross(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2)
+    {
+        //快速排斥
+        if (Mathf.Min(start1.x, end1.x) - Mathf.Max(start2.x, end2.x) > 0.01 ||
+            Mathf.Min(start1.y, end1.y) - Mathf.Max(start2.y, end2.y) > 0.01 ||
+            Mathf.Min(start1.z, end1.z) - Mathf.Max(start2.z, end2.z) > 0.01 ||
+            Mathf.Min(start2.x, end2.x) - Mathf.Max(start1.x, end1.x) > 0.01 ||
+            Mathf.Min(start2.y, end2.y) - Mathf.Max(start1.y, end1.y) > 0.01 ||
+            Mathf.Min(start2.z, end2.z) - Mathf.Max(start1.z, end1.z) > 0.01)
+        {
+            return false;
+        }
+
+        Vector3 line1 = end1 - start1;
+        Vector3 line2 = end2 - start2;
+
+        //跨立
+        if (Vector3.Cross(line1, start2 - start1).normalized == Vector3.Cross(line1, end2 - start1).normalized ||
+            Vector3.Cross(line2, start1 - start2).normalized == Vector3.Cross(line2, end1 - start2).normalized)
+        {
+            return false;
+        }
+
+        return true;
     }
 }
