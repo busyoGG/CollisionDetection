@@ -717,10 +717,24 @@ public class Collision : MonoBehaviour
         if (isParallel)
         {
             //完全平行
-            float disStart1 = (GetClosestPointOnLineSegment(start1, end1, start2) - start2).sqrMagnitude;
-            float disEnd1 = (GetClosestPointOnLineSegment(start1, end1, end2) - end2).sqrMagnitude;
+            float len1 = line1.sqrMagnitude;
+            float len2 = line2.sqrMagnitude;
 
-            dis = Mathf.Min(disStart1, disEnd1);
+            float disStart;
+            float disEnd;
+
+            if (len1 > len2)
+            {
+                disStart = (GetClosestPointOnLineSegment(start1, end1, start2) - start2).sqrMagnitude;
+                disEnd = (GetClosestPointOnLineSegment(start1, end1, end2) - end2).sqrMagnitude;
+            }
+            else
+            {
+                disStart = (GetClosestPointOnLineSegment(start2, end2, start1) - start1).sqrMagnitude;
+                disEnd = (GetClosestPointOnLineSegment(start2, end2, end1) - end1).sqrMagnitude;
+            }
+
+            dis = Mathf.Min(disStart, disEnd);
         }
         else
         {
@@ -754,7 +768,7 @@ public class Collision : MonoBehaviour
                 float direction = Vector3.Dot(directionStart, normal) > 0 ? 1 : -1;
                 // 检测线段相交
                 bool isLineCross = CheckLineCross(start1, end1, start2 - normal.normalized * (offset * direction),
-                    end2 - normal.normalized * (offset * direction)); 
+                    end2 - normal.normalized * (offset * direction));
 
                 if (isLineCross)
                 {

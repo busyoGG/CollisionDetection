@@ -249,7 +249,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
-  extents: {x: 0, y: 0, z: 0}
+  extents: {x: 0, y: 0.72, z: 0}
   center: {x: 0, y: 0, z: 0}
   radius: 1
   direction: {x: 0, y: 0, z: 0}
@@ -285,7 +285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obj1: {fileID: 875163318}
   obj2: {fileID: 235361839}
-  _collision: 8
+  _collision: 11
 --- !u!4 &262192669
 Transform:
   m_ObjectHideFlags: 0
